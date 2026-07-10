@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.loader import load_stmt_income, load_seasonality, load_cogs_composition
+from loader import load_stmt_income, load_seasonality, load_cogs_composition
 from utils.charts import kpi_card, bar_variance, pie_composition
 from utils.formatting import format_df, ribu_to_juta
 from utils.style import inject_style
