@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.loader import load_stmt_income, load_komparasi_pl
+from loader import load_stmt_income, load_komparasi_pl
 from utils.charts import kpi_card, bar_compare
 from utils.formatting import ribu_to_juta
 from utils.style import inject_style
