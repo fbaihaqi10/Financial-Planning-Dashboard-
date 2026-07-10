@@ -1,8 +1,8 @@
 import streamlit as st
-from utils.loader import load_stmt_income, load_volume_variance, load_variance_unit
-from utils.charts import bar_variance
-from utils.formatting import format_df, ribu_to_juta
-from utils.style import inject_style
+from loader import load_stmt_income, load_volume_variance, load_variance_unit
+from charts import bar_variance
+from formatting import format_df, ribu_to_juta
+from style import inject_style
 
 inject_style()
 
