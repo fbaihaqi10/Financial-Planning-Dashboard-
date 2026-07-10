@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
-from utils.loader import load_stmt_income
+from loader import load_stmt_income
 from utils.charts import kpi_card, PLOT_LAYOUT, TEAL
 from utils.formatting import format_df
 from utils.style import inject_style
