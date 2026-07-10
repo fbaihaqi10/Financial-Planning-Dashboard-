@@ -1,5 +1,7 @@
-streamlit
-pandas
-openpyxl
-plotly
-fpdf2
+streamlit==1.59.1
+pandas==2.3.1
+openpyxl==3.1.5
+plotly==6.0.1
+fpdf2==2.8.4
+pyarrow==21.0.0
+numpy==2.3.1
