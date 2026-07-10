@@ -142,7 +142,7 @@ def load_volume_variance():
         if pd.isna(produk):
             continue
         rows.append({
-            "produk": produk, "jenis_customer": df.iloc[i, 3], "satuan": df.iloc[i, 4],
+            "produk": str(df.iloc[i, 2]), "jenis_customer": str(df.iloc[i, 3]), "satuan": str(df.iloc[i, 4]),
             "volume_rkap": df.iloc[i, 5], "volume_realisasi": df.iloc[i, 6], "over_under": df.iloc[i, 7],
             "harga_jual_rkap": df.iloc[i, 8], "cogs_rkap": df.iloc[i, 9], "margin_rkap": df.iloc[i, 10],
             "efek_vol_thd_rev": df.iloc[i, 11],
@@ -161,7 +161,7 @@ def load_cogs_price():
         if pd.isna(produk):
             continue
         rows.append({
-            "produk": produk, "jenis_customer": df.iloc[i, 3],
+            "produk": str(df.iloc[i, 2]), "jenis_customer": str(df.iloc[i, 3]),
             "cogs_rkap": df.iloc[i, 4], "cogs_realisasi": df.iloc[i, 5], "selisih_cogs": df.iloc[i, 6],
             "volume_rkap": df.iloc[i, 7], "volume_realisasi": df.iloc[i, 8],
             "efek_harga_thd_cogs": df.iloc[i, 9], "efek_volume_thd_cogs": df.iloc[i, 10],
@@ -180,7 +180,7 @@ def load_selling_price():
         if pd.isna(produk):
             continue
         rows.append({
-            "produk": produk, "jenis_customer": df.iloc[i, 3],
+            "produk": str(df.iloc[i, 2]), "jenis_customer": str(df.iloc[i, 3]),
             "revenue_rkap": df.iloc[i, 4], "revenue_realisasi": df.iloc[i, 5],
             "selisih_usdkl": df.iloc[i, 6], "volume_realisasi": df.iloc[i, 7],
             "efek_harga_jual": df.iloc[i, 8],
