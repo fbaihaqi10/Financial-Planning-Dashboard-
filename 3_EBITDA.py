@@ -42,9 +42,9 @@ if ebitda is not None:
         text=[f"{v:,.1f}" for v in values], textposition="outside",
     ))
     fig.update_layout(**PLOT_LAYOUT, height=380)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width=True)
 
 st.caption("Satuan: US$ Juta")
 
 with st.expander("Lihat semua rasio & metrik finansial"):
-    st.dataframe(format_df(stmt, exclude_cols=["item"]), use_container_width=True)
+    st.dataframe(format_df(stmt, exclude_cols=["item"]), width=True)
