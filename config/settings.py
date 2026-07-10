@@ -1,8 +1,8 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data_new"
-EXCEL_FILE = DATA_DIR / "05. Financial Dashboard FPF.xlsx"
+
+EXCEL_FILE = BASE_DIR / "05. Financial Dashboard FPF.xlsx"
 
 # Nama sheet -- disalin persis dari file Excel (Excel memotong nama sheet
 # yang panjang jadi maksimal 31 karakter, makanya beberapa nama terpotong)
