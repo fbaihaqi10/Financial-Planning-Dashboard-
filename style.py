@@ -74,7 +74,35 @@ div[data-testid="stDataFrame"] {
     border: 1px solid rgba(126,178,209,0.16);
     border-radius: 8px;
 }
+
+/* ---- Footer copyright, fixed di bawah tengah, muncul di semua halaman ---- */
+.app-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    text-align: center;
+    padding: 6px 12px 8px;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: rgba(147, 170, 192, 0.75);
+    background: rgba(8, 24, 38, 0.85);
+    backdrop-filter: blur(4px);
+    border-top: 1px solid rgba(126, 178, 209, 0.15);
+}
+
+/* Kasih jarak biar konten utama tidak ketutupan footer */
+.block-container {
+    padding-bottom: 60px !important;
+}
 </style>
+
+<div class="app-footer">
+    Copyright &copy; 2026. Budget Consolidation.<br>
+    Financial Planning &amp; Forecasting<br>
+    Subholding Downstream
+</div>
 """
 
 
