@@ -75,6 +75,105 @@ div[data-testid="stDataFrame"] {
     border-radius: 8px;
 }
 
+/* ---- Fade-in halus saat halaman/konten dimuat ---- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.block-container {
+    padding-bottom: 60px !important;
+    animation: fadeInUp 0.35s ease-out;
+}
+
+/* ---- KPI Card versi kustom (ikon + badge + progress bar) ---- */
+.kpi-card-v2 {
+    background: linear-gradient(160deg, #16324F, #0F2740);
+    border: 1px solid rgba(45, 212, 191, 0.18);
+    border-left: 4px solid #2DD4BF;
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    margin-bottom: 8px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    animation: fadeInUp 0.4s ease-out;
+}
+.kpi-card-v2:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    border-color: rgba(45, 212, 191, 0.5);
+}
+.kpi-card-v2-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.kpi-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+.kpi-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+.kpi-label-v2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #93AAC0;
+    margin-bottom: 4px;
+}
+.kpi-value-v2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #E7EFF6;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+.kpi-unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: #93AAC0;
+}
+.kpi-bar-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 4px;
+    background: rgba(147, 170, 192, 0.15);
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+.kpi-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+.kpi-bar-caption {
+    font-size: 11px;
+    color: #93AAC0;
+}
+
+/* ---- Legenda warna ---- */
+.color-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #93AAC0;
+    margin: -6px 0 16px;
+}
+.legend-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
 /* ---- Footer copyright, fixed di bawah tengah, muncul di semua halaman ---- */
 .app-footer {
     position: fixed;
@@ -90,11 +189,6 @@ div[data-testid="stDataFrame"] {
     background: rgba(8, 24, 38, 0.85);
     backdrop-filter: blur(4px);
     border-top: 1px solid rgba(126, 178, 209, 0.15);
-}
-
-/* Kasih jarak biar konten utama tidak ketutupan footer */
-.block-container {
-    padding-bottom: 60px !important;
 }
 </style>
 
