@@ -40,7 +40,7 @@ if not gp_unit.empty:
     units = [u for u in UNIT_BISNIS if u != "KONSOLIDASI"]
     values = ribu_to_juta([r[u] for u in units])
     fig = bar_variance(units, values, height=380)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width="stretch")
 st.caption("Satuan: US$ Juta")
 
 st.divider()
@@ -53,8 +53,8 @@ filtered = cogs_comp[
 ]
 values_juta = ribu_to_juta(filtered["real_value"].abs())
 fig2 = pie_composition(filtered["item"], values_juta, height=420)
-st.plotly_chart(fig2, use_container_width=True)
+st.plotly_chart(fig2, use_container_width="stretch")
 st.caption("Satuan: US$ Juta")
 
 with st.expander("Lihat data mentah Komposisi COGS (satuan asli: US$ Ribu)"):
-    st.dataframe(format_df(cogs_comp, exclude_cols=["item"]), use_container_width=True)
+    st.dataframe(format_df(cogs_comp, exclude_cols=["item"]), use_container_width="stretch")
