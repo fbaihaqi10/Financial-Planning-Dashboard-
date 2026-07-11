@@ -1,260 +1,324 @@
-import streamlit as st
+"""
+Loader untuk file '05. Financial Dashboard FPF.xlsx'.
+
+Setiap sheet Excel punya 1 kolom kosong di paling kiri (kolom A),
+jadi semua index kolom di bawah dihitung dari situ.
+
+Semua fungsi load_xxx() mengembalikan pandas.DataFrame.
+"""
+
 import pandas as pd
 
-from loader import (
-    load_stmt_income,
-    load_seasonality,
-    load_selling_price,
+from config.settings import (
+    EXCEL_FILE,
+    SHEET_STMT_INCOME,
+    SHEET_VARIANCE_UNIT,
+    SHEET_COGS_COMP,
+    SHEET_SEASONALITY,
+    SHEET_KOMPARASI_PL,
+    SHEET_SELLING_PRICE,
+    SHEET_COGS_PRICE,
+    SHEET_VOLUME_VAR,
+    UNIT_BISNIS,
 )
 
-from charts import (
-    kpi_card,
-    bar_variance,
-)
-
-from formatting import (
-    ribu_to_juta,
-)
-
-from style import inject_style
-from config.settings import UNIT_BISNIS
 
 # ======================================================
-# PAGE SETUP
+# HELPER
 # ======================================================
 
-inject_style()
+def get_workbook():
+    return pd.ExcelFile(EXCEL_FILE)
 
-st.title("💰 Revenue")
-st.caption(
-    "Analisis pendapatan usaha: realisasi, kontribusi per unit bisnis, dan efek harga jual"
-)
 
-# ======================================================
-# LOAD DATA
-# ======================================================
+def get_sheet_names():
+    return get_workbook().sheet_names
 
-try:
-    stmt = load_stmt_income()
-except Exception as e:
-    st.error(f"Gagal load Statement Income: {e}")
-    stmt = pd.DataFrame()
 
-try:
-    seasonality = load_seasonality()
-except Exception as e:
-    st.error(f"Gagal load Seasonality: {e}")
-    seasonality = pd.DataFrame()
+def _raw(sheet_name):
+    return pd.read_excel(
+        EXCEL_FILE,
+        sheet_name=sheet_name,
+        header=None,
+        engine="openpyxl",
+    )
 
-try:
-    selling_price = load_selling_price()
-except Exception as e:
-    st.error(f"Gagal load Selling Price: {e}")
-    selling_price = pd.DataFrame()
 
-# ======================================================
-# KPI
-# ======================================================
-
-if not stmt.empty and "item" in stmt.columns:
-
-    row = stmt[
-        stmt["item"]
-        .astype(str)
-        .str.strip()
-        .str.upper()
-        == "PENDAPATAN USAHA"
-    ]
-
-    if not row.empty:
-
-        r = row.iloc[0]
-
-        c1, c2, c3 = st.columns(3)
-
-        with c1:
-
-            try:
-                kpi_card(
-                    "Realisasi Ytd Mei",
-                    r["realisasi"],
-                    "RKAP",
-                    delta_pct=float(r["pct_c_b"]) - 1,
-                    unit="Jt USD",
-                )
-            except:
-                st.metric(
-                    "Realisasi Ytd Mei",
-                    f"{float(r['realisasi']):,.1f}"
-                )
-
-        with c2:
-
-            st.metric(
-                "RKAP Seasonality",
-                f"{float(r['rkap_seasonality']):,.1f} Jt USD"
-            )
-
-        with c3:
-
-            st.metric(
-                "Prognosa 2026",
-                f"{float(r['prognosa']):,.1f} Jt USD"
-            )
-
-st.divider()
-
-# ======================================================
-# REVENUE PER UNIT
-# ======================================================
-
-st.subheader("Kontribusi Revenue per Unit Bisnis")
-
-if not seasonality.empty:
-
-    try:
-
-        rev_row = seasonality[
-            seasonality["item"]
-            .astype(str)
-            .str.strip()
-            .str.upper()
-            ==
-            "JUMLAH PENJUALAN DAN PENDAPATAN USAHA LAINNYA"
-        ]
-
-        if not rev_row.empty:
-
-            r = rev_row.iloc[0]
-
-            units = [
-                u for u in UNIT_BISNIS
-                if u != "KONSOLIDASI"
-            ]
-
-            values = []
-
-            for unit in units:
-
-                value = r.get(unit, 0)
-
-                if pd.isna(value):
-                    value = 0
-
-                values.append(value)
-
-            fig = bar_variance(
-                units,
-                ribu_to_juta(values),
-                height=400,
-            )
-
-            st.plotly_chart(
-                fig,
-                use_container_width=True,
-            )
-
-    except Exception as e:
-
-        st.warning(
-            f"Chart Revenue per Unit gagal dibuat: {e}"
-        )
-
-st.caption("Satuan: US$ Juta")
-
-st.divider()
-
-# ======================================================
-# SELLING PRICE ANALYSIS
-# ======================================================
-
-st.subheader(
-    "Efek Harga Jual terhadap Revenue per Produk"
-)
-
-if not selling_price.empty:
-
-    try:
-
-        sp = selling_price.copy()
-
-        sp["produk"] = (
-            sp["produk"]
-            .fillna("")
-            .astype(str)
-        )
-
-        sp["efek_harga_jual"] = pd.to_numeric(
-            sp["efek_harga_jual"],
-            errors="coerce"
-        ).fillna(0)
-
-        sp = sp[
-            sp["produk"].str.upper()
-            != "TOTAL ALL"
-        ]
-
-        sp = sp.sort_values(
-            by="efek_harga_jual"
-        )
-
-        fig2 = bar_variance(
-            sp["produk"],
-            ribu_to_juta(
-                sp["efek_harga_jual"]
-            ),
-            height=500,
-            horizontal=True,
-        )
-
-        st.plotly_chart(
-            fig2,
-            use_container_width=True,
-        )
-
-    except Exception as e:
-
-        st.warning(
-            f"Grafik selling price gagal dibuat: {e}"
-        )
-
-st.caption(
-    "Satuan: US$ Juta — nilai positif menunjukkan harga jual realisasi lebih tinggi dari RKAP"
-)
-
-st.divider()
-
-# ======================================================
-# RAW DATA
-# ======================================================
-
-with st.expander(
-    "Lihat Data Selling Price"
+def _parse_pl_sheet(
+    sheet_name,
+    name_col,
+    value_cols,
+    data_start_row,
 ):
+    df = _raw(sheet_name)
 
-    if selling_price.empty:
+    rows = []
 
-        st.info("Tidak ada data")
+    for i in range(data_start_row, len(df)):
 
-    else:
+        name = df.iloc[i, name_col]
 
-        safe_df = selling_price.copy()
+        if pd.isna(name) or name == 0:
+            continue
 
-        safe_df = safe_df.fillna("")
+        row = {
+            "item": str(name).strip()
+        }
 
-        st.dataframe(
-            safe_df,
-            use_container_width=True,
-        )
+        for out_name, col_idx in value_cols.items():
+            row[out_name] = df.iloc[i, col_idx]
+
+        rows.append(row)
+
+    return pd.DataFrame(rows)
+
 
 # ======================================================
-# DEBUG
+# 1. STATEMENT OF COMPREHENSIVE INCOME
 # ======================================================
 
-with st.expander("Debug Info"):
+def load_stmt_income():
 
-    st.write("Statement Income:", stmt.shape)
+    return _parse_pl_sheet(
+        SHEET_STMT_INCOME,
+        name_col=0,
+        value_cols={
+            "rkap2026": 1,
+            "rkap_seasonality": 2,
+            "realisasi": 3,
+            "prognosa": 4,
+            "pct_c_a": 5,
+            "pct_c_b": 6,
+            "pct_d_a": 7,
+        },
+        data_start_row=7,
+    )
 
-    st.write("Seasonality:", seasonality.shape)
 
-    st.write("Selling Price:", selling_price.shape)
+# ======================================================
+# 2. KOMPARASI PL
+# ======================================================
+
+def load_komparasi_pl():
+
+    return _parse_pl_sheet(
+        SHEET_KOMPARASI_PL,
+        name_col=0,
+        value_cols={
+            "realisasi": 1,
+            "prognosa": 2,
+            "var_opsen": 3,
+            "pct_opsen": 4,
+            "var_konsol": 5,
+            "pct_konsol": 6,
+        },
+        data_start_row=5,
+    )
+
+
+# ======================================================
+# 3. SEASONALITY PER UNIT BISNIS
+# ======================================================
+
+def load_seasonality():
+
+    df = _raw(SHEET_SEASONALITY)
+
+    rows = []
+
+    for i in range(4, len(df)):
+
+        item = df.iloc[i, 1]
+
+        if pd.isna(item) or item == 0:
+            continue
+
+        row = {
+            "item": str(item).strip()
+        }
+
+        for j, unit in enumerate(UNIT_BISNIS):
+            row[unit] = df.iloc[i, 2 + j]
+
+        rows.append(row)
+
+    return pd.DataFrame(rows)
+
+
+# ======================================================
+# 4. COGS COMPOSITION
+# ======================================================
+
+def load_cogs_composition():
+
+    df = _raw(SHEET_COGS_COMP)
+
+    rows = []
+
+    for i in range(5, len(df)):
+
+        item = df.iloc[i, 1]
+
+        if pd.isna(item):
+            continue
+
+        rows.append({
+            "item": str(item).strip(),
+
+            "rkap_volume": df.iloc[i, 2],
+            "rkap_price": df.iloc[i, 3],
+            "rkap_value": df.iloc[i, 4],
+
+            "rkapprop_volume": df.iloc[i, 5],
+            "rkapprop_price": df.iloc[i, 6],
+            "rkapprop_value": df.iloc[i, 7],
+
+            "real_volume": df.iloc[i, 8],
+            "real_price": df.iloc[i, 9],
+            "real_value": df.iloc[i, 10],
+        })
+
+    return pd.DataFrame(rows)
+
+
+# ======================================================
+# 5. VARIANCE UNIT BISNIS
+# ======================================================
+
+def load_variance_unit():
+
+    df = _raw(SHEET_VARIANCE_UNIT)
+
+    rows = []
+
+    for i in range(5, len(df)):
+
+        unit = df.iloc[i, 1]
+
+        if pd.isna(unit):
+            continue
+
+        rows.append({
+            "unit": str(unit).strip(),
+
+            "rkap_volume": df.iloc[i, 2],
+            "rkap_price": df.iloc[i, 3],
+            "rkap_value": df.iloc[i, 4],
+
+            "real_volume": df.iloc[i, 5],
+            "real_price": df.iloc[i, 6],
+            "real_value": df.iloc[i, 7],
+
+            "variance_volume": df.iloc[i, 8],
+            "variance_value": df.iloc[i, 9],
+
+            "qty_variance": df.iloc[i, 10],
+            "price_variance": df.iloc[i, 11],
+            "total_variance": df.iloc[i, 12],
+        })
+
+    return pd.DataFrame(rows)
+
+
+# ======================================================
+# 6. VOLUME VARIANCE
+# ======================================================
+
+def load_volume_variance():
+
+    df = _raw(SHEET_VOLUME_VAR)
+
+    rows = []
+
+    for i in range(7, len(df)):
+
+        produk = df.iloc[i, 2]
+
+        if pd.isna(produk):
+            continue
+
+        rows.append({
+            "produk": str(df.iloc[i, 2]),
+            "jenis_customer": str(df.iloc[i, 3]),
+            "satuan": str(df.iloc[i, 4]),
+
+            "volume_rkap": df.iloc[i, 5],
+            "volume_realisasi": df.iloc[i, 6],
+            "over_under": df.iloc[i, 7],
+
+            "harga_jual_rkap": df.iloc[i, 8],
+            "cogs_rkap": df.iloc[i, 9],
+            "margin_rkap": df.iloc[i, 10],
+
+            "efek_vol_thd_rev": df.iloc[i, 11],
+        })
+
+    return pd.DataFrame(rows)
+
+
+# ======================================================
+# 7. COGS PRICE ANALYSIS
+# ======================================================
+
+def load_cogs_price():
+
+    df = _raw(SHEET_COGS_PRICE)
+
+    rows = []
+
+    for i in range(7, len(df)):
+
+        produk = df.iloc[i, 2]
+
+        if pd.isna(produk):
+            continue
+
+        rows.append({
+            "produk": str(df.iloc[i, 2]),
+            "jenis_customer": str(df.iloc[i, 3]),
+
+            "cogs_rkap": df.iloc[i, 4],
+            "cogs_realisasi": df.iloc[i, 5],
+            "selisih_cogs": df.iloc[i, 6],
+
+            "volume_rkap": df.iloc[i, 7],
+            "volume_realisasi": df.iloc[i, 8],
+
+            "efek_harga_thd_cogs": df.iloc[i, 9],
+            "efek_volume_thd_cogs": df.iloc[i, 10],
+        })
+
+    return pd.DataFrame(rows)
+
+
+# ======================================================
+# 8. SELLING PRICE ANALYSIS
+# ======================================================
+
+def load_selling_price():
+
+    df = _raw(SHEET_SELLING_PRICE)
+
+    rows = []
+
+    for i in range(7, len(df)):
+
+        produk = df.iloc[i, 2]
+
+        if pd.isna(produk):
+            continue
+
+        rows.append({
+            "produk": str(df.iloc[i, 2]),
+            "jenis_customer": str(df.iloc[i, 3]),
+
+            "revenue_rkap": df.iloc[i, 4],
+            "revenue_realisasi": df.iloc[i, 5],
+
+            "selisih_usdkl": df.iloc[i, 6],
+            "volume_realisasi": df.iloc[i, 7],
+
+            "efek_harga_jual": df.iloc[i, 8],
+        })
+
+    return pd.DataFrame(rows)
