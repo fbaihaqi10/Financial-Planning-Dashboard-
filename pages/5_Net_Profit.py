@@ -1,8 +1,8 @@
 import streamlit as st
 from loader import load_stmt_income, load_komparasi_pl
-from utils.charts import kpi_card, bar_compare
-from utils.formatting import format_df, ribu_to_juta
-from utils.style import inject_style
+from charts import kpi_card, bar_compare
+from formatting import format_df, ribu_to_juta
+from style import inject_style
 
 inject_style()
 
