@@ -1,6 +1,6 @@
 import streamlit as st
 from loader import load_stmt_income, load_komparasi_pl
-from charts import kpi_card, bar_compare
+from charts import kpi_card, bar_compare, color_legend
 from formatting import ribu_to_juta
 from style import inject_style
 
@@ -8,6 +8,7 @@ inject_style()
 
 st.title("📊 Executive Summary")
 st.caption("Realisasi Ytd Mei 2026 vs RKAP 2026 (Seasonality) & Prognosa Mei 2026")
+color_legend()
 
 stmt = load_stmt_income()
 kp = load_komparasi_pl()
@@ -29,6 +30,7 @@ def get_item(df, name):
 # ---- Baris KPI utama ----
 kpi_names = ["Pendapatan Usaha", "Laba/(Rugi) Kotor", "Laba/(Rugi) Usaha", "EBITDA", "Laba/(Rugi) Bersih"]
 cols = st.columns(len(kpi_names))
+icon_map = {"Pendapatan Usaha": "💰", "Laba/(Rugi) Kotor": "🧾", "Laba/(Rugi) Usaha": "⚙️", "EBITDA": "📈", "Laba/(Rugi) Bersih": "🏦"}
 for col, name in zip(cols, kpi_names):
     row = get_item(stmt, name)
     if row is None:
@@ -40,6 +42,7 @@ for col, name in zip(cols, kpi_names):
             comparison_label="RKAP",
             delta_pct=row["pct_c_b"] - 1,
             unit="Jt USD",
+            icon=icon_map.get(name, "📊"),
         )
 
 st.divider()
