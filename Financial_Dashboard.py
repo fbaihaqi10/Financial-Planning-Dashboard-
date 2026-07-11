@@ -2,7 +2,7 @@ import streamlit as st
 from style import inject_style
 
 st.set_page_config(
-    page_title="Financial Planning & Forecasting Dashboard",
+    page_title="Financial Planning Dashboard",
     page_icon="📊",
     layout="wide",
 )
