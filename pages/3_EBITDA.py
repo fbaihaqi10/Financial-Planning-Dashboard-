@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 from loader import load_stmt_income
-from charts import kpi_card, PLOT_LAYOUT, TEAL
+from charts import kpi_card, PLOT_LAYOUT, TEAL, color_legend
 from formatting import format_df
 from style import inject_style
 
@@ -9,6 +9,7 @@ inject_style()
 
 st.title("📈 EBITDA")
 st.caption("Earnings Before Interest, Tax, Depreciation & Amortization — Ytd Mei 2026")
+color_legend()
 
 stmt = load_stmt_income()
 
@@ -24,7 +25,7 @@ margin = get_item(stmt, "EBITDA Margin")
 c1, c2 = st.columns(2)
 if ebitda is not None:
     with c1:
-        kpi_card("EBITDA Realisasi", ebitda["realisasi"], "RKAP Seasonality", delta_pct=ebitda["pct_c_b"] - 1, unit="Jt USD")
+        kpi_card("EBITDA Realisasi", ebitda["realisasi"], "RKAP Seasonality", delta_pct=ebitda["pct_c_b"] - 1, unit="Jt USD", icon="📈")
 if margin is not None:
     with c2:
         st.metric("EBITDA Margin", f"{margin['realisasi']*100:.1f}%",
