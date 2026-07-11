@@ -1,6 +1,6 @@
 import streamlit as st
 from loader import load_stmt_income, load_volume_variance, load_variance_unit
-from charts import bar_variance
+from charts import bar_variance, color_legend
 from formatting import format_df, ribu_to_juta
 from style import inject_style
 
@@ -8,6 +8,7 @@ inject_style()
 
 st.title("🛢️ Volume")
 st.caption("Analisis volume: RKAP (Seasonality) vs Realisasi, per unit bisnis & per produk")
+color_legend()
 
 stmt = load_stmt_income()
 volume_variance = load_volume_variance()
