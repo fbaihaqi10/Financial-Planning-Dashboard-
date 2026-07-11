@@ -28,12 +28,49 @@ PLOT_LAYOUT = dict(
 )
 
 
-def kpi_card(label, value, comparison_label=None, comparison_value=None, delta_pct=None, unit=""):
-    """Tampilkan 1 KPI card pakai st.metric bawaan Streamlit (sudah otomatis pemisah ribuan lewat ':,')."""
-    delta_str = None
-    if delta_pct is not None:
-        delta_str = f"{delta_pct*100:+.1f}% vs {comparison_label}" if comparison_label else f"{delta_pct*100:+.1f}%"
-    st.metric(label=label, value=f"{value:,.1f} {unit}".strip(), delta=delta_str)
+def kpi_card(label, value, comparison_label=None, comparison_value=None, delta_pct=None, unit="", icon="📊"):
+    """
+    KPI card custom (bukan st.metric bawaan) dengan:
+    - ikon di kiri atas
+    - badge status warna (Di Atas / Sesuai / Di Bawah target)
+    - progress bar kecil menunjukkan % pencapaian terhadap target
+    """
+    delta_pct = delta_pct if delta_pct is not None else 0
+    achievement = 1 + delta_pct  # realisasi / target
+
+    if delta_pct >= 0.03:
+        badge_color, badge_text = TEAL, "Di Atas RKAP"
+    elif delta_pct <= -0.03:
+        badge_color, badge_text = CORAL, "Di Bawah RKAP"
+    else:
+        badge_color, badge_text = AMBER, "Sesuai RKAP"
+
+    bar_pct = max(0, min(achievement, 1.3)) / 1.3 * 100  # dinormalisasi, cap tampilan di 130%
+    comp_label = comparison_label or "target"
+
+    st.markdown(f"""
+    <div class="kpi-card-v2">
+      <div class="kpi-card-v2-top">
+        <span class="kpi-icon">{icon}</span>
+        <span class="kpi-badge" style="background:{badge_color}26;color:{badge_color};border:1px solid {badge_color}66;">{badge_text}</span>
+      </div>
+      <div class="kpi-label-v2">{label}</div>
+      <div class="kpi-value-v2">{value:,.1f}<span class="kpi-unit"> {unit}</span></div>
+      <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:{bar_pct:.0f}%; background:{badge_color};"></div></div>
+      <div class="kpi-bar-caption">{achievement*100:.0f}% dari {comp_label}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def color_legend():
+    """Legenda kecil menjelaskan arti warna teal/coral/amber, ditaruh di bawah judul halaman."""
+    st.markdown(f"""
+    <div class="color-legend">
+      <span><span class="legend-dot" style="background:{TEAL};"></span> Sesuai / di atas RKAP</span>
+      <span><span class="legend-dot" style="background:{AMBER};"></span> Mendekati RKAP</span>
+      <span><span class="legend-dot" style="background:{CORAL};"></span> Di bawah RKAP</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def bar_compare(labels, series_a, series_a_name, series_b, series_b_name, height=380, horizontal=False):
