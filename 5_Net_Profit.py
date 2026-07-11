@@ -48,8 +48,8 @@ realisasi = ribu_to_juta([r["realisasi"] if r is not None else 0 for r in rows])
 prognosa = ribu_to_juta([r["prognosa"] if r is not None else 0 for r in rows])
 
 fig = bar_compare(labels, prognosa, "Prognosa Mei 2026", realisasi, "Realisasi Ytd Mei", height=400)
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width="stretch")
 st.caption("Satuan: US$ Juta")
 
 with st.expander("Lihat data mentah Komparasi P&L (satuan asli: US$ Ribu)"):
-    st.dataframe(format_df(kp, exclude_cols=["item"]), use_container_width=True)
+    st.dataframe(format_df(kp, exclude_cols=["item"]), use_container_width="stretch")
