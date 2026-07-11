@@ -1,5 +1,5 @@
 import streamlit as st
-from style import inject_style
+from utils.style import inject_style
 
 st.set_page_config(
     page_title="Financial Planning Dashboard",
