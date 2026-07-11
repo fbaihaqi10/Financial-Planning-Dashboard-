@@ -36,9 +36,8 @@ def format_df(df: pd.DataFrame, decimals: int = 2, exclude_cols=None) -> pd.Data
                 lambda v: f"{v:,.{decimals}f}" if pd.notna(v) else "-"
             )
         else:
-            # Coba paksa jadi angka; sel yang gagal dikonversi (mis. "-") jadi NaN
             coerced = pd.to_numeric(out[col], errors="coerce")
-            if coerced.notna().mean() >= 0.5:  # mayoritas isinya angka -> anggap kolom angka
+            if coerced.notna().mean() >= 0.5:
                 out[col] = coerced.map(
                     lambda v: f"{v:,.{decimals}f}" if pd.notna(v) else "-"
                 )
