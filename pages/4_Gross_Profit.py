@@ -1,6 +1,6 @@
 import streamlit as st
 from loader import load_stmt_income, load_seasonality, load_cogs_composition
-from charts import kpi_card, bar_variance, pie_composition
+from charts import kpi_card, bar_variance, pie_composition, color_legend
 from formatting import format_df, ribu_to_juta
 from style import inject_style
 from config.settings import UNIT_BISNIS
@@ -9,6 +9,7 @@ inject_style()
 
 st.title("🧾 Gross Profit")
 st.caption("Laba Kotor (Revenue dikurangi COGS) — Ytd Mei 2026")
+color_legend()
 
 stmt = load_stmt_income()
 seasonality = load_seasonality()
@@ -24,7 +25,7 @@ gp = get_item(stmt, "Laba/(Rugi) Kotor")
 if gp is not None:
     c1, c2, c3 = st.columns(3)
     with c1:
-        kpi_card("Laba Kotor Realisasi", gp["realisasi"], "RKAP", delta_pct=gp["pct_c_b"] - 1, unit="Jt USD")
+        kpi_card("Laba Kotor Realisasi", gp["realisasi"], "RKAP", delta_pct=gp["pct_c_b"] - 1, unit="Jt USD", icon="🧾")
     with c2:
         st.metric("RKAP Seasonality Ytd May", f"{gp['rkap_seasonality']:,.1f} Jt USD")
     with c3:
