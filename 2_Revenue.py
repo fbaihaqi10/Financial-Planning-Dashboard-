@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 from loader import (
     load_stmt_income,
@@ -7,12 +8,10 @@ from loader import (
 )
 
 from charts import (
-    kpi_card,
     bar_variance,
 )
 
 from formatting import (
-    format_df,
     ribu_to_juta,
 )
 
@@ -22,151 +21,133 @@ from config.settings import UNIT_BISNIS
 inject_style()
 
 st.title("💰 Revenue")
-st.caption(
-    "Analisis pendapatan usaha: realisasi, kontribusi per unit bisnis, dan efek harga jual"
-)
+st.caption("Revenue Analysis")
 
-stmt = load_stmt_income()
-seasonality = load_seasonality()
-selling_price = load_selling_price()
+# =====================================================
+# TEST LOAD DATA
+# =====================================================
 
-# ======================================================
-# KPI
-# ======================================================
+st.write("Loading Statement Income...")
 
-row = stmt[stmt["item"] == "Pendapatan Usaha"]
+try:
+    stmt = load_stmt_income()
+    st.success(f"Statement Income OK ({stmt.shape[0]} rows)")
+except Exception as e:
+    st.error(f"Statement Income ERROR: {e}")
+    st.stop()
 
-if not row.empty:
+st.write("Loading Seasonality...")
 
-    r = row.iloc[0]
+try:
+    seasonality = load_seasonality()
+    st.success(f"Seasonality OK ({seasonality.shape[0]} rows)")
+except Exception as e:
+    st.error(f"Seasonality ERROR: {e}")
+    st.stop()
 
-    c1, c2, c3 = st.columns(3)
+st.write("Loading Selling Price...")
 
-    with c1:
-        kpi_card(
-            "Realisasi Ytd Mei",
-            r["realisasi"],
-            "RKAP",
-            delta_pct=r["pct_c_b"] - 1,
-            unit="Jt USD",
-        )
-
-    with c2:
-        st.metric(
-            "RKAP 2026 (Seasonality Ytd May)",
-            f"{r['rkap_seasonality']:,.1f} Jt USD",
-        )
-
-    with c3:
-        st.metric(
-            "Prognosa Full Year 2026",
-            f"{r['prognosa']:,.1f} Jt USD",
-        )
+try:
+    selling_price = load_selling_price()
+    st.success(f"Selling Price OK ({selling_price.shape[0]} rows)")
+except Exception as e:
+    st.error(f"Selling Price ERROR: {e}")
+    st.stop()
 
 st.divider()
 
-# ======================================================
-# REVENUE PER UNIT
-# ======================================================
+# =====================================================
+# KPI REVENUE
+# =====================================================
 
-st.subheader("Kontribusi Revenue per Unit Bisnis")
+if not stmt.empty:
 
-rev_row = seasonality[
-    seasonality["item"]
-    == "Jumlah penjualan dan pendapatan usaha lainnya"
-]
-
-if not rev_row.empty:
-
-    r = rev_row.iloc[0]
-
-    units = [
-        u for u in UNIT_BISNIS
-        if u != "KONSOLIDASI"
+    row = stmt[
+        stmt["item"].astype(str).str.upper()
+        == "PENDAPATAN USAHA"
     ]
 
-    values = ribu_to_juta(
-        [r[u] for u in units]
-    )
+    if not row.empty:
 
-    fig = bar_variance(
-        units,
-        values,
-        height=380,
-    )
+        r = row.iloc[0]
 
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-    )
+        c1, c2, c3 = st.columns(3)
 
-st.caption("Satuan: US$ Juta")
+        c1.metric(
+            "Realisasi",
+            f"{float(r['realisasi']):,.1f}"
+        )
+
+        c2.metric(
+            "RKAP Seasonality",
+            f"{float(r['rkap_seasonality']):,.1f}"
+        )
+
+        c3.metric(
+            "Prognosa",
+            f"{float(r['prognosa']):,.1f}"
+        )
 
 st.divider()
 
-# ======================================================
-# SELLING PRICE
-# ======================================================
+# =====================================================
+# REVENUE PER UNIT
+# =====================================================
 
-st.subheader(
-    "Efek Harga Jual terhadap Revenue per Produk"
-)
+try:
 
-sp = selling_price.copy()
+    row = seasonality[
+        seasonality["item"].astype(str).str.upper()
+        ==
+        "JUMLAH PENJUALAN DAN PENDAPATAN USAHA LAINNYA"
+    ]
 
-sp["produk"] = sp["produk"].astype(str)
+    if not row.empty:
 
-sp["efek_harga_jual"] = (
-    sp["efek_harga_jual"]
-    .fillna(0)
-)
+        r = row.iloc[0]
 
-sp = sp[
-    sp["produk"].str.upper()
-    != "TOTAL ALL"
-]
+        units = [
+            u for u in UNIT_BISNIS
+            if u != "KONSOLIDASI"
+        ]
 
-sp = sp.sort_values(
-    "efek_harga_jual"
-)
+        values = []
 
-fig2 = bar_variance(
-    sp["produk"],
-    ribu_to_juta(
-        sp["efek_harga_jual"]
-    ),
-    height=420,
-    horizontal=True,
-)
+        for unit in units:
+            values.append(r.get(unit, 0))
 
-st.plotly_chart(
-    fig2,
-    use_container_width=True,
-)
-
-st.caption(
-    "Satuan: US$ Juta — nilai positif berarti harga jual realisasi lebih tinggi dari RKAP"
-)
-
-# ======================================================
-# DETAIL
-# ======================================================
-
-with st.expander(
-    "Lihat data mentah Selling Price Analysis"
-):
-
-    safe_df = selling_price.copy()
-
-    for col in safe_df.columns:
-        safe_df[col] = (
-            safe_df[col]
-            .fillna("")
-            .astype(str)
+        fig = bar_variance(
+            units,
+            ribu_to_juta(values),
+            height=400,
         )
 
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+        )
+
+except Exception as e:
+
+    st.error(f"Revenue Chart Error: {e}")
+
+st.divider()
+
+# =====================================================
+# SELLING PRICE
+# =====================================================
+
+try:
+
+    sp = selling_price.copy()
+
+    st.subheader("Selling Price Data")
+
     st.dataframe(
-        safe_df,
+        sp.head(20),
         use_container_width=True,
     )
-``
+
+except Exception as e:
+
+    st.error(f"Selling Price Error: {e}")
