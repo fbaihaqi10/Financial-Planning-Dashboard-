@@ -1,6 +1,6 @@
 import streamlit as st
 from loader import load_stmt_income, load_komparasi_pl
-from charts import kpi_card, bar_compare
+from charts import kpi_card, bar_compare, color_legend
 from formatting import format_df, ribu_to_juta
 from style import inject_style
 
@@ -8,6 +8,7 @@ inject_style()
 
 st.title("🏦 Net Profit")
 st.caption("Laba/(Rugi) Tahun Berjalan — Ytd Mei 2026")
+color_legend()
 
 stmt = load_stmt_income()
 kp = load_komparasi_pl()
@@ -24,7 +25,7 @@ margin = get_item(stmt, "Profit Margin")
 c1, c2 = st.columns(2)
 if npf is not None:
     with c1:
-        kpi_card("Laba Bersih Realisasi", npf["realisasi"], "RKAP", delta_pct=npf["pct_c_b"] - 1, unit="Jt USD")
+        kpi_card("Laba Bersih Realisasi", npf["realisasi"], "RKAP", delta_pct=npf["pct_c_b"] - 1, unit="Jt USD", icon="🏦")
 if margin is not None:
     with c2:
         st.metric("Profit Margin", f"{margin['realisasi']*100:.1f}%",
